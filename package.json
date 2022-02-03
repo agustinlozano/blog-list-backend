@@ -6,7 +6,9 @@
   "scripts": {
     "start": "cross-env NODE_ENV=production node index.js",
     "dev": "cross-env NODE_ENV=development nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "cross-env NODE_ENV=test jest --verbose --silent",
+    "deploy": "git push heroku master",
+    "test:watch": "npm run test -- --watch"
   },
   "repository": {
     "type": "git",
@@ -26,6 +28,7 @@
   },
   "devDependencies": {
     "cross-env": "7.0.3",
+    "jest": "27.4.7",
     "nodemon": "2.0.15",
     "standard": "16.0.4"
   },
