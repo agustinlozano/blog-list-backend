@@ -1,0 +1,36 @@
+{
+  "name": "blog-list",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agustinlozano/blog-list.git"
+  },
+  "author": "Agustin Lozano Blua",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/agustinlozano/blog-list/issues"
+  },
+  "homepage": "https://github.com/agustinlozano/blog-list#readme",
+  "dependencies": {
+    "cors": "2.8.5",
+    "dotenv": "16.0.0",
+    "express": "4.17.2"
+  },
+  "devDependencies": {
+    "nodemon": "2.0.15",
+    "standard": "16.0.4"
+  },
+  "eslintConfig": {
+    "extends": "./node_modules/standard/eslintrc.json",
+    "env": {
+      "jest": true
+    }
+  }
+}
