@@ -1,10 +1,12 @@
 const listHelper = require('../utils/list_helper')
 
-test('dummy always return one', () => {
-  const blogs = listHelper.blogList
-  const result = listHelper.dummy(blogs)
+describe('Testing useless method', () => {
+  test('dummy always return one', () => {
+    const blogs = listHelper.blogList
+    const result = listHelper.dummy(blogs)
 
-  expect(result).toBe(1)
+    expect(result).toBe(1)
+  })
 })
 
 describe('Total likes', () => {
@@ -39,18 +41,11 @@ describe('Total likes', () => {
 })
 
 describe('Favorite blog', () => {
-  test('which blog has most likes', () => {
-    const mostLikesBlog = {
-      title: 'Canonical string reduction',
-      author: 'Edsger W. Dijkstra',
-      likes: 12
-    }
-    const result = listHelper.favoriteBlog(listHelper.blogList)
+  test('of empty list is an empty object', () => {
+    const emptyList = []
+    const result = listHelper.favoriteBlog(emptyList)
 
-    delete result.url
-    delete result.id
-
-    expect(result).toEqual(mostLikesBlog)
+    expect(result).toEqual({})
   })
 
   test('when list has only one blog equals the likes of that', () => {
@@ -68,10 +63,46 @@ describe('Favorite blog', () => {
     expect(result).toEqual(OnlyOneBlog[0])
   })
 
+  test('of a bigger list is calculated right', () => {
+    const mostLikesBlog = {
+      title: 'Canonical string reduction',
+      author: 'Edsger W. Dijkstra',
+      likes: 12
+    }
+    const result = listHelper.favoriteBlog(listHelper.blogList)
+
+    delete result.url
+    delete result.id
+
+    expect(result).toEqual(mostLikesBlog)
+  })
+})
+
+describe('Most Blogs', () => {
   test('of empty list is an empty object', () => {
-    const emptyList = []
-    const result = listHelper.favoriteBlog(emptyList)
+    const result = listHelper.mostBlogs([])
 
     expect(result).toEqual({})
+  })
+
+  test('when list has only one blog equals the blog of that', () => {
+    const OnlyOneBlog = [{
+      title: 'midudev',
+      author: 'Miguel Angel',
+      url: 'https://midu.dev/',
+      likes: 10,
+      id: '61fbf3a29337e4076ce5148b'
+    }]
+    const result = listHelper.mostBlogs(OnlyOneBlog)
+
+    expect(result).toEqual({ author: 'Miguel Angel', blogs: 1 })
+  })
+
+  test('of a bigger list is calculated right', () => {
+    const result = listHelper.mostBlogs(listHelper.blogList)
+
+    console.log(result)
+
+    expect(result).toEqual({ author: 'Edsger W. Dijkstra', blogs: 2 })
   })
 })

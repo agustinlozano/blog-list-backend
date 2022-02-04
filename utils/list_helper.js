@@ -1,3 +1,5 @@
+const _ = require('lodash')
+
 const blogList = [
   {
     title: 'midudev',
@@ -55,9 +57,30 @@ const favoriteBlog = (blogs) => {
   return favorite
 }
 
+const mostBlogs = (blogs) => {
+  const result = {}
+
+  if (blogs.length) {
+    const authors = blogs.map(blog => blog.author)
+
+    const favoriteAuthor = _.head(_(authors)
+      .countBy()
+      .entries()
+      .maxBy(_.last))
+
+    const recurrence = authors.filter(author => author === favoriteAuthor)
+
+    result.author = favoriteAuthor
+    result.blogs = recurrence.length
+  }
+
+  return result
+}
+
 module.exports = {
   dummy,
   totalLikes,
   favoriteBlog,
+  mostBlogs,
   blogList
 }
