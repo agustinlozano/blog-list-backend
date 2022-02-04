@@ -3,7 +3,7 @@ const blogList = [
     title: 'midudev',
     author: 'Miguel Angel',
     url: 'https://midu.dev/',
-    likes: 1,
+    likes: 10,
     id: '61fbf3a29337e4076ce5148b'
   },
   {
@@ -41,8 +41,23 @@ const totalLikes = (blogs) => {
   return likes
 }
 
+const favoriteBlog = (blogs) => {
+  let favorite = {}
+
+  if (blogs.length) {
+    favorite = blogs.reduce((currentMostLikes, blog) => {
+      return currentMostLikes.likes > blog.likes
+        ? currentMostLikes
+        : blog
+    }, { likes: 0 })
+  }
+
+  return favorite
+}
+
 module.exports = {
   dummy,
   totalLikes,
+  favoriteBlog,
   blogList
 }
