@@ -63,14 +63,14 @@ const mostBlogs = (blogs) => {
   if (blogs.length) {
     const authors = blogs.map(blog => blog.author)
 
-    const favoriteAuthor = _.head(_(authors)
+    const largestBlogsAuthor = _.head(_(authors)
       .countBy()
       .entries()
       .maxBy(_.last))
 
-    const recurrence = authors.filter(author => author === favoriteAuthor)
+    const recurrence = authors.filter(author => author === largestBlogsAuthor)
 
-    result.author = favoriteAuthor
+    result.author = largestBlogsAuthor
     result.blogs = recurrence.length
   }
 
