@@ -43,11 +43,12 @@ describe('Favorite blog', () => {
     const mostLikesBlog = {
       title: 'Canonical string reduction',
       author: 'Edsger W. Dijkstra',
-      url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html',
-      likes: 12,
-      id: '61fc2b69908a2cb4700758de'
+      likes: 12
     }
     const result = listHelper.favoriteBlog(listHelper.blogList)
+
+    delete result.url
+    delete result.id
 
     expect(result).toEqual(mostLikesBlog)
   })
