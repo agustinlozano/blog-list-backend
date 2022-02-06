@@ -1,6 +1,7 @@
 const server = require('../index')
 const mongoose = require('mongoose')
 const Blog = require('../models/Blogs')
+const _ = require('lodash')
 const {
   initialBlogs,
   getBlogResponse,
@@ -65,6 +66,7 @@ describe('GET /api/blogs', () => {
 
 describe('POST /api/blogs', () => {
   test('a valid blog can be added', async () => {
+    const { blogs: beginningBlogs } = await getBlogResponse()
     const validBlog = {
       title: 'First class tests',
       author: 'Robert C. Martin',
@@ -76,6 +78,29 @@ describe('POST /api/blogs', () => {
       .post('/api/blogs')
       .send(validBlog)
       .expect(201)
+
+    const { blogs: currentBlogs } = await getBlogResponse()
+    const lastBlogAdded = _.last(currentBlogs)
+
+    expect(currentBlogs).toHaveLength(beginningBlogs.length + 1)
+
+    expect(lastBlogAdded.author).toBe('Robert C. Martin')
+  })
+})
+
+describe('DELETE /api/blogs/:id', () => {
+  test('delete a blog return 204', async () => {
+    const { blogs: beginningBlogs } = await getBlogResponse()
+    const deletedBlog = beginningBlogs[0]
+
+    await api
+      .delete(`/api/blogs/${deletedBlog.id}`)
+      .expect(204)
+
+    const { blogs: currentBlogs } = await getBlogResponse()
+
+    expect(currentBlogs).toHaveLength(beginningBlogs.length - 1)
+    expect(currentBlogs).not.toContain(deletedBlog)
   })
 })
 
