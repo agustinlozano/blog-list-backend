@@ -75,6 +75,18 @@ describe('POST /api/blogs', () => {
 
     expect(lastBlogAdded.author).toBe('Robert C. Martin')
   })
+
+  test('a invalid blog cannot be added', async () => {
+    const invalidBlog = {
+      author: 'Agustin Lozano',
+      likes: 0
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(invalidBlog)
+      .expect(400)
+  })
 })
 
 describe('DELETE /api/blogs/:id', () => {
