@@ -17,6 +17,15 @@ router.post('/', (request, response, next) => {
     .catch(err => next(err))
 })
 
+router.get('/:id', (request, response, next) => {
+  const id = request.params.id
+
+  Blog
+    .findById(id)
+    .then(result => response.json(result))
+    .catch(err => next(err))
+})
+
 router.delete('/:id', (request, response, next) => {
   const id = request.params.id
 

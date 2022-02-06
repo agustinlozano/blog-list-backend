@@ -33,17 +33,6 @@ describe('GET /api/blogs', () => {
       .expect('Content-Type', /json/)
   })
 
-  // No tengo este controlador aplicado todavia
-  test('a blog is returned as json', async () => {
-    const { blogs } = await getBlogResponse()
-    const firstBlog = blogs[0]
-
-    await api
-      .get(`/api/blogs/${firstBlog.id}`)
-      .expect(404)
-      .expect('Content-Type', /text\/html/)
-  })
-
   test('there are four blogs in the list', async () => {
     const { blogs } = await getBlogResponse()
 
@@ -101,6 +90,18 @@ describe('DELETE /api/blogs/:id', () => {
 
     expect(currentBlogs).toHaveLength(beginningBlogs.length - 1)
     expect(currentBlogs).not.toContain(deletedBlog)
+  })
+})
+
+describe('GET /api/blogs/:id', () => {
+  test('a blog is returned as json', async () => {
+    const { blogs } = await getBlogResponse()
+    const firstBlog = blogs[0]
+
+    await api
+      .get(`/api/blogs/${firstBlog.id}`)
+      .expect(200)
+      .expect('Content-Type', /json/)
   })
 })
 
