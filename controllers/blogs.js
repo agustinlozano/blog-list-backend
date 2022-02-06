@@ -4,7 +4,7 @@ const Blog = require('../models/Blogs')
 router.get('/', (request, response, next) => {
   Blog
     .find({})
-    .then(blogs => { response.json(blogs) })
+    .then(blogs => response.json(blogs))
     .catch(err => next(err))
 })
 
@@ -13,7 +13,7 @@ router.post('/', (request, response, next) => {
 
   blog
     .save()
-    .then(result => { response.status(201).json(result) })
+    .then(result => response.status(201).json(result))
     .catch(err => next(err))
 })
 
