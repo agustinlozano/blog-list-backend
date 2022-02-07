@@ -1,10 +1,11 @@
 const express = require('express')
+require('express-async-errors')
 const app = express()
 const cors = require('cors')
 const mongoose = require('mongoose')
 const config = require('./utils/config')
 const router = require('./controllers/blogs')
-const handleErrors = require('./utils/middleware')
+const { handleErrors, requestLogger } = require('./utils/middleware')
 
 /* conexion a mongoDB */
 mongoose.connect(config.MONGODB_URI)
@@ -17,6 +18,7 @@ mongoose.connect(config.MONGODB_URI)
 
 app.use(cors())
 app.use(express.json())
+app.use(requestLogger)
 
 app.use('/api/blogs', router)
 
