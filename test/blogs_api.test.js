@@ -33,25 +33,6 @@ describe('GET /api/blogs', () => {
       .expect(200)
       .expect('Content-Type', /json/)
   })
-
-  test('there are four blogs in the list', async () => {
-    const { blogs } = await getBlogResponse()
-
-    expect(blogs.length).toBe(initialBlogs.length)
-  })
-
-  test('a blog is by Midudev', async () => {
-    const miduBlog = {
-      title: 'midudev',
-      author: 'Miguel Angel',
-      url: 'https://midu.dev/',
-      likes: 10
-    }
-    const { blogs } = await getBlogResponse()
-    const authors = blogs.map(blog => blog.author)
-
-    expect(authors).toContain(miduBlog.author)
-  })
 })
 
 describe('POST /api/blogs', () => {
@@ -161,6 +142,27 @@ describe('database properties', () => {
     const existingBlog = blogs[0]
 
     expect(existingBlog.id).toBeDefined()
+  })
+})
+
+describe('test the inicial blogs', () => {
+  test('there are four blogs in the list', async () => {
+    const { blogs } = await getBlogResponse()
+
+    expect(blogs.length).toBe(initialBlogs.length)
+  })
+
+  test('a blog is by Midudev', async () => {
+    const miduBlog = {
+      title: 'midudev',
+      author: 'Miguel Angel',
+      url: 'https://midu.dev/',
+      likes: 10
+    }
+    const { blogs } = await getBlogResponse()
+    const authors = blogs.map(blog => blog.author)
+
+    expect(authors).toContain(miduBlog.author)
   })
 })
 
