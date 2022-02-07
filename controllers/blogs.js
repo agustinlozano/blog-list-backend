@@ -14,7 +14,7 @@ router.post('/', (request, response, next) => {
     title: body.title,
     author: body.author,
     url: body.url,
-    likes: body.likes
+    likes: body.likes || 0
   })
 
   newBlog

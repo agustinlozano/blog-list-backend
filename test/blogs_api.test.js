@@ -55,7 +55,6 @@ describe('GET /api/blogs', () => {
 
 describe('POST /api/blogs', () => {
   test('a valid blog can be added', async () => {
-    const { blogs: beginningBlogs } = await getBlogResponse()
     const validBlog = {
       title: 'First class tests',
       author: 'Robert C. Martin',
@@ -68,12 +67,29 @@ describe('POST /api/blogs', () => {
       .send(validBlog)
       .expect(201)
 
-    const { blogs: currentBlogs } = await getBlogResponse()
-    const lastBlogAdded = _.last(currentBlogs)
+    const { blogs: blogsAtEnd } = await getBlogResponse()
+    const lastBlogAdded = _.last(blogsAtEnd)
 
-    expect(currentBlogs).toHaveLength(beginningBlogs.length + 1)
-
+    expect(blogsAtEnd).toHaveLength(initialBlogs.length + 1)
     expect(lastBlogAdded.author).toBe('Robert C. Martin')
+  })
+
+  test('if a valid blog has no likes then the blog has zero likes', async () => {
+    const blogWithoutLikes = {
+      title: 'First class tests',
+      author: 'Robert C. Martin',
+      url: 'http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll',
+      likes: undefined
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(blogWithoutLikes)
+      .expect(201)
+
+    const { blogs: blogsAtEnd } = await getBlogResponse()
+    const lastBlogAdded = _.last(blogsAtEnd)
+    expect(lastBlogAdded.likes).toBe(0)
   })
 
   test('a invalid blog cannot be added', async () => {
@@ -86,6 +102,10 @@ describe('POST /api/blogs', () => {
       .post('/api/blogs')
       .send(invalidBlog)
       .expect(400)
+
+    const { blogs: blogsAfterPost } = await getBlogResponse()
+
+    expect(blogsAfterPost).toHaveLength(initialBlogs.length)
   })
 })
 
@@ -106,7 +126,7 @@ describe('DELETE /api/blogs/:id', () => {
 })
 
 describe('GET /api/blogs/:id', () => {
-  test('a blog is returned as json', async () => {
+  test('a blog can be viewed', async () => {
     const { blogs } = await getBlogResponse()
     const firstBlog = blogs[0]
 
@@ -114,6 +134,15 @@ describe('GET /api/blogs/:id', () => {
       .get(`/api/blogs/${firstBlog.id}`)
       .expect(200)
       .expect('Content-Type', /json/)
+  })
+})
+
+describe('database properties', () => {
+  test('the id is defined correctly', async () => {
+    const { blogs } = await getBlogResponse()
+    const existingBlog = blogs[0]
+
+    expect(existingBlog.id).toBeDefined()
   })
 })
 
