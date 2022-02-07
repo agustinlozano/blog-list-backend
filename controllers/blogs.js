@@ -28,7 +28,13 @@ router.get('/:id', (request, response, next) => {
 
   Blog
     .findById(id)
-    .then(result => response.json(result))
+    .then(result => {
+      if (result) {
+        return response.json(result)
+      } else {
+        response.status(404).end()
+      }
+    })
     .catch(err => next(err))
 })
 
