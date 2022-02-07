@@ -113,6 +113,7 @@ describe('DELETE /api/blogs/:id', () => {
     await api
       .delete(`/api/blogs/${invalidId}`)
       .expect(400)
+      .expect({ error: 'id used is malformed' })
 
     const { response } = await getBlogResponse()
 
@@ -151,12 +152,75 @@ describe('GET /api/blogs/:id', () => {
       .expect(404)
   })
 
-  test('fails with statuscode 400 id is invalid', async () => {
+  test('fails with statuscode 400 if id is invalid', async () => {
     const invalidId = '123'
 
     await api
       .get(`/api/blogs/${invalidId}`)
       .expect(400)
+      .expect({ error: 'id used is malformed' })
+  })
+})
+
+describe('PUT /api/blogs/:id', () => {
+  const catBlogInfo = {
+    title: 'Cats are going to rule the entire world',
+    author: 'Phd Ninito',
+    url: 'https://www.newurl.com/new-blog',
+    likes: 13
+  }
+
+  test('succeeds with a valid id', async () => {
+    const { blogs: blogsBeforeChanges } = await getBlogResponse()
+    const existingblog = blogsBeforeChanges[0]
+
+    const blogInfo = {
+      title: 'New title',
+      author: existingblog.author,
+      url: 'https://www.newurl.com/new-blog',
+      likes: 13
+    }
+
+    await api
+      .put(`/api/blogs/${existingblog.id}`)
+      .send(blogInfo)
+      .expect(200)
+
+    const { blogs: blogsAfterChanges } = await getBlogResponse()
+    const titles = blogsAfterChanges.map(blog => blog.title)
+    const urls = blogsAfterChanges.map(blog => blog.url)
+
+    expect(titles).toContain('New title')
+    expect(urls).toContain('https://www.newurl.com/new-blog')
+  })
+
+  test('fails with statuscode 404 if id does not exist', async () => {
+    const validNonexistingId = await nonExistingId()
+
+    await api
+      .put(`/api/blogs/${validNonexistingId}`)
+      .send(catBlogInfo)
+      .expect(404)
+
+    const { blogs: blogsAfterPut } = await getBlogResponse()
+    const titles = blogsAfterPut.map(blog => blog.title)
+
+    expect(titles).not.toContain('Cats are going to rule the entire world')
+  })
+
+  test('fails with statuscode 400 if id is invalid', async () => {
+    const invalidId = '1234'
+
+    await api
+      .put(`/api/blogs/${invalidId}`)
+      .send(catBlogInfo)
+      .expect(400)
+      .expect({ error: 'id used is malformed' })
+
+    const { blogs: blogsAfterPut } = await getBlogResponse()
+    const titles = blogsAfterPut.map(blog => blog.title)
+
+    expect(titles).not.toContain('Cats are going to rule the entire world')
   })
 })
 
@@ -187,6 +251,17 @@ describe('test the inicial blogs', () => {
     const authors = blogs.map(blog => blog.author)
 
     expect(authors).toContain(miduBlog.author)
+  })
+})
+
+describe('when an unknown endpoint is passed as a route', () => {
+  test('returns a status code 404', async () => {
+    const unknownEndpoint = '/an/Invalid/RouteLikeThis'
+
+    await api
+      .get(unknownEndpoint)
+      .expect(404)
+      .expect({ error: 'unknown endpoint' })
   })
 })
 
