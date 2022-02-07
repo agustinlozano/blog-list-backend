@@ -5,6 +5,7 @@ const _ = require('lodash')
 const {
   initialBlogs,
   getBlogResponse,
+  nonExistingId,
   api
 } = require('./blog_api_helper')
 
@@ -86,6 +87,7 @@ describe('POST /api/blogs', () => {
       .post('/api/blogs')
       .send(blogWithoutLikes)
       .expect(201)
+      .expect('Content-Type', /json/)
 
     const { blogs: blogsAtEnd } = await getBlogResponse()
     const lastBlogAdded = _.last(blogsAtEnd)
@@ -95,7 +97,7 @@ describe('POST /api/blogs', () => {
   test('a invalid blog cannot be added', async () => {
     const invalidBlog = {
       author: 'Agustin Lozano',
-      likes: 0
+      likes: 10
     }
 
     await api
@@ -128,12 +130,28 @@ describe('DELETE /api/blogs/:id', () => {
 describe('GET /api/blogs/:id', () => {
   test('a blog can be viewed', async () => {
     const { blogs } = await getBlogResponse()
-    const firstBlog = blogs[0]
+    const existingBlog = blogs[0]
 
     await api
-      .get(`/api/blogs/${firstBlog.id}`)
+      .get(`/api/blogs/${existingBlog.id}`)
       .expect(200)
       .expect('Content-Type', /json/)
+  })
+
+  test('fails with statuscode 404 if blog does not exist', async () => {
+    const validNonexistingId = await nonExistingId()
+
+    await api
+      .get(`/api/blogs/${validNonexistingId}`)
+      .expect(404)
+  })
+
+  test('fails with statuscode 400 id is invalid', async () => {
+    const invalidId = '123'
+
+    await api
+      .get(`/api/blogs/${invalidId}`)
+      .expect(400)
   })
 })
 
