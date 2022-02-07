@@ -24,7 +24,7 @@ router.get('/:id', async (request, response, next) => {
 
   const blog = await Blog.findById(id)
   if (blog) {
-    return response.json(blog)
+    response.json(blog)
   } else {
     response.status(404).end()
   }
@@ -34,7 +34,11 @@ router.delete('/:id', async (request, response, next) => {
   const id = request.params.id
 
   const deletedBlog = await Blog.findByIdAndDelete(id)
-  response.status(204).json(deletedBlog)
+  if (deletedBlog) {
+    response.status(204).json(deletedBlog)
+  } else {
+    response.status(404).end()
+  }
 })
 
 module.exports = router

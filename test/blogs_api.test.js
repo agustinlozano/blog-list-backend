@@ -93,7 +93,7 @@ describe('POST /api/blogs', () => {
 })
 
 describe('DELETE /api/blogs/:id', () => {
-  test('delete a blog return 204', async () => {
+  test('a existing blog return 204', async () => {
     const { blogs: beginningBlogs } = await getBlogResponse()
     const deletedBlog = beginningBlogs[0]
 
@@ -105,6 +105,30 @@ describe('DELETE /api/blogs/:id', () => {
 
     expect(currentBlogs).toHaveLength(beginningBlogs.length - 1)
     expect(currentBlogs).not.toContain(deletedBlog)
+  })
+
+  test('fails with status code 400 with an invalid ID', async () => {
+    const invalidId = '1234'
+
+    await api
+      .delete(`/api/blogs/${invalidId}`)
+      .expect(400)
+
+    const { response } = await getBlogResponse()
+
+    expect(response.body).toHaveLength(initialBlogs.length)
+  })
+
+  test('fails with status code 404 with a nonexisting ID', async () => {
+    const validNonexistingId = await nonExistingId()
+
+    await api
+      .delete(`/api/blogs/${validNonexistingId}`)
+      .expect(404)
+
+    const { response } = await getBlogResponse()
+
+    expect(response.body).toHaveLength(initialBlogs.length)
   })
 })
 
