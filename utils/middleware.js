@@ -18,7 +18,12 @@ const requestLogger = (request, response, next) => {
   next()
 }
 
+const notFound = (req, res, next) => {
+  res.status(404).send({ error: 'unknown endpoint' })
+}
+
 module.exports = {
   handleErrors,
-  requestLogger
+  requestLogger,
+  notFound
 }

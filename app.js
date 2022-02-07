@@ -5,7 +5,11 @@ const cors = require('cors')
 const mongoose = require('mongoose')
 const config = require('./utils/config')
 const router = require('./controllers/blogs')
-const { handleErrors, requestLogger } = require('./utils/middleware')
+const {
+  handleErrors,
+  requestLogger,
+  notFound
+} = require('./utils/middleware')
 
 /* conexion a mongoDB */
 mongoose.connect(config.MONGODB_URI)
@@ -22,6 +26,7 @@ app.use(requestLogger)
 
 app.use('/api/blogs', router)
 
+app.use(notFound)
 app.use(handleErrors)
 
 module.exports = app
