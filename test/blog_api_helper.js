@@ -1,6 +1,7 @@
 const supertest = require('supertest')
 const app = require('../app')
 const api = supertest(app)
+const Blog = require('../models/Blogs')
 const initialBlogs = [
   {
     title: 'midudev',
@@ -34,8 +35,22 @@ const getBlogResponse = async () => {
   return { response, blogs }
 }
 
+const nonExistingId = async () => {
+  const blog = new Blog({
+    title: 'Type wars',
+    author: 'Robert C. Martin',
+    url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
+    likes: 2
+  })
+  await blog.save()
+  await blog.remove()
+
+  return blog.id.toString()
+}
+
 module.exports = {
   initialBlogs,
   getBlogResponse,
+  nonExistingId,
   api
 }
