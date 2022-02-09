@@ -2,6 +2,7 @@ const supertest = require('supertest')
 const app = require('../app')
 const api = supertest(app)
 const Blog = require('../models/Blogs')
+// const User = require('../models/User')
 const initialBlogs = [
   {
     title: 'midudev',
@@ -29,6 +30,19 @@ const initialBlogs = [
   }
 ]
 
+const initialUsers = [
+  {
+    username: 'CatitoX',
+    name: 'Cato',
+    passwordHash: 'BebeIsMyFriend'
+  },
+  {
+    username: 'Ninito',
+    name: 'Gordo Gris',
+    passwordHash: 'DadIsTheBest'
+  }
+]
+
 const getBlogResponse = async () => {
   const response = await api.get('/api/blogs')
   const blogs = response.body
@@ -48,9 +62,21 @@ const nonExistingId = async () => {
   return blog.id.toString()
 }
 
+const getUserResponse = async () => {
+  const response = await api.get('/api/users')
+  const body = response.body
+  const usernames = body.map(user => user.username)
+  const names = body.map(user => user.name)
+  const passwordsHash = body.map(user => user.passwordHash)
+
+  return { response, body, usernames, names, passwordsHash }
+}
+
 module.exports = {
   initialBlogs,
+  initialUsers,
   getBlogResponse,
   nonExistingId,
+  getUserResponse,
   api
 }
