@@ -14,7 +14,7 @@ const userSchema = new Schema({
   passwordHash: String,
   blogs: [{
     type: Schema.Types.ObjectId,
-    ref: 'Blogs'
+    ref: 'Blog'
   }]
 })
 
