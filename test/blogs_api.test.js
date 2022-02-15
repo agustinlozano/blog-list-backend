@@ -2,12 +2,12 @@ const server = require('../index')
 const mongoose = require('mongoose')
 const Blog = require('../models/Blogs')
 const _ = require('lodash')
+const api = require('./helper')
 const {
   initialBlogs,
   getBlogResponse,
-  nonExistingId,
-  api
-} = require('./blog_api_helper')
+  nonExistingId
+} = require('./blog_helper')
 
 beforeEach(async () => {
   await Blog.deleteMany({})
@@ -49,7 +49,7 @@ describe('POST /api/blogs', () => {
       .send(validBlog)
       .expect(201)
 
-    const { blogs: blogsAtEnd } = await getBlogResponse()
+    const { response: blogsAtEnd } = await getBlogResponse()
     const lastBlogAdded = _.last(blogsAtEnd)
 
     expect(blogsAtEnd).toHaveLength(initialBlogs.length + 1)
@@ -70,7 +70,7 @@ describe('POST /api/blogs', () => {
       .expect(201)
       .expect('Content-Type', /json/)
 
-    const { blogs: blogsAtEnd } = await getBlogResponse()
+    const { response: blogsAtEnd } = await getBlogResponse()
     const lastBlogAdded = _.last(blogsAtEnd)
     expect(lastBlogAdded.likes).toBe(0)
   })
@@ -86,7 +86,7 @@ describe('POST /api/blogs', () => {
       .send(invalidBlog)
       .expect(400)
 
-    const { blogs: blogsAfterPost } = await getBlogResponse()
+    const { response: blogsAfterPost } = await getBlogResponse()
 
     expect(blogsAfterPost).toHaveLength(initialBlogs.length)
   })
@@ -94,30 +94,28 @@ describe('POST /api/blogs', () => {
 
 describe('DELETE /api/blogs/:id', () => {
   test('a existing blog return 204', async () => {
-    const { blogs: beginningBlogs } = await getBlogResponse()
-    const deletedBlog = beginningBlogs[0]
+    const { response: blogsAtStart } = await getBlogResponse()
+    const deletedBlog = blogsAtStart[0]
 
     await api
       .delete(`/api/blogs/${deletedBlog.id}`)
       .expect(204)
 
-    const { blogs: currentBlogs } = await getBlogResponse()
+    const { response: blogsAtEnd } = await getBlogResponse()
 
-    expect(currentBlogs).toHaveLength(beginningBlogs.length - 1)
-    expect(currentBlogs).not.toContain(deletedBlog)
+    expect(blogsAtEnd).toHaveLength(blogsAtStart.length - 1)
+    expect(blogsAtEnd).not.toContain(deletedBlog)
   })
 
   test('fails with status code 400 with an invalid ID', async () => {
-    const invalidId = '1234'
-
     await api
-      .delete(`/api/blogs/${invalidId}`)
+      .delete('/api/blogs/1234')
       .expect(400)
       .expect({ error: 'id used is malformed' })
 
-    const { response } = await getBlogResponse()
+    const { response: blogs } = await getBlogResponse()
 
-    expect(response.body).toHaveLength(initialBlogs.length)
+    expect(blogs).toHaveLength(initialBlogs.length)
   })
 
   test('fails with status code 404 with a nonexisting ID', async () => {
@@ -127,15 +125,15 @@ describe('DELETE /api/blogs/:id', () => {
       .delete(`/api/blogs/${validNonexistingId}`)
       .expect(404)
 
-    const { response } = await getBlogResponse()
+    const { response: blogs } = await getBlogResponse()
 
-    expect(response.body).toHaveLength(initialBlogs.length)
+    expect(blogs).toHaveLength(initialBlogs.length)
   })
 })
 
 describe('GET /api/blogs/:id', () => {
   test('a blog can be viewed', async () => {
-    const { blogs } = await getBlogResponse()
+    const { response: blogs } = await getBlogResponse()
     const existingBlog = blogs[0]
 
     await api
@@ -153,10 +151,8 @@ describe('GET /api/blogs/:id', () => {
   })
 
   test('fails with statuscode 400 if id is invalid', async () => {
-    const invalidId = '123'
-
     await api
-      .get(`/api/blogs/${invalidId}`)
+      .get('/api/blogs/1234')
       .expect(400)
       .expect({ error: 'id used is malformed' })
   })
@@ -171,8 +167,8 @@ describe('PUT /api/blogs/:id', () => {
   }
 
   test('succeeds with a valid id', async () => {
-    const { blogs: blogsBeforeChanges } = await getBlogResponse()
-    const existingblog = blogsBeforeChanges[0]
+    const { response: blogsAtStart } = await getBlogResponse()
+    const existingblog = blogsAtStart[0]
 
     const blogInfo = {
       title: 'New title',
@@ -186,9 +182,9 @@ describe('PUT /api/blogs/:id', () => {
       .send(blogInfo)
       .expect(200)
 
-    const { blogs: blogsAfterChanges } = await getBlogResponse()
-    const titles = blogsAfterChanges.map(blog => blog.title)
-    const urls = blogsAfterChanges.map(blog => blog.url)
+    const { response: blogsAtEnd } = await getBlogResponse()
+    const titles = blogsAtEnd.map(blog => blog.title)
+    const urls = blogsAtEnd.map(blog => blog.url)
 
     expect(titles).toContain('New title')
     expect(urls).toContain('https://www.newurl.com/new-blog')
@@ -202,22 +198,20 @@ describe('PUT /api/blogs/:id', () => {
       .send(catBlogInfo)
       .expect(404)
 
-    const { blogs: blogsAfterPut } = await getBlogResponse()
+    const { response: blogsAfterPut } = await getBlogResponse()
     const titles = blogsAfterPut.map(blog => blog.title)
 
     expect(titles).not.toContain('Cats are going to rule the entire world')
   })
 
   test('fails with statuscode 400 if id is invalid', async () => {
-    const invalidId = '1234'
-
     await api
-      .put(`/api/blogs/${invalidId}`)
+      .put('/api/blogs/1234')
       .send(catBlogInfo)
       .expect(400)
       .expect({ error: 'id used is malformed' })
 
-    const { blogs: blogsAfterPut } = await getBlogResponse()
+    const { response: blogsAfterPut } = await getBlogResponse()
     const titles = blogsAfterPut.map(blog => blog.title)
 
     expect(titles).not.toContain('Cats are going to rule the entire world')
@@ -226,7 +220,7 @@ describe('PUT /api/blogs/:id', () => {
 
 describe('database properties', () => {
   test('the id is defined correctly', async () => {
-    const { blogs } = await getBlogResponse()
+    const { response: blogs } = await getBlogResponse()
     const existingBlog = blogs[0]
 
     expect(existingBlog.id).toBeDefined()
@@ -235,7 +229,7 @@ describe('database properties', () => {
 
 describe('test the inicial blogs', () => {
   test('there are four blogs in the list', async () => {
-    const { blogs } = await getBlogResponse()
+    const { response: blogs } = await getBlogResponse()
 
     expect(blogs.length).toBe(initialBlogs.length)
   })
@@ -247,7 +241,7 @@ describe('test the inicial blogs', () => {
       url: 'https://midu.dev/',
       likes: 10
     }
-    const { blogs } = await getBlogResponse()
+    const { response: blogs } = await getBlogResponse()
     const authors = blogs.map(blog => blog.author)
 
     expect(authors).toContain(miduBlog.author)
