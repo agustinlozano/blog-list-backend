@@ -1,6 +1,3 @@
-const supertest = require('supertest')
-const app = require('../app')
-const api = supertest(app)
 const Blog = require('../models/Blogs')
 
 const initialBlogs = [
@@ -51,6 +48,5 @@ const nonExistingId = async () => {
 module.exports = {
   initialBlogs,
   getBlogResponse,
-  nonExistingId,
-  api
+  nonExistingId
 }
