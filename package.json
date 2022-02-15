@@ -21,13 +21,14 @@
   },
   "homepage": "https://github.com/agustinlozano/blog-list#readme",
   "dependencies": {
-    "bcrypt": "^5.0.1",
+    "bcrypt": "5.0.1",
     "cors": "2.8.5",
     "dotenv": "16.0.0",
     "express": "4.17.2",
     "express-async-errors": "3.1.1",
     "lodash": "4.17.21",
-    "mongoose": "6.2.0"
+    "mongoose": "6.2.0",
+    "mongoose-unique-validator": "3.0.0"
   },
   "devDependencies": {
     "cross-env": "7.0.3",
