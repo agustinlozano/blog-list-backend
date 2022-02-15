@@ -1,11 +1,11 @@
 const server = require('../index')
 const mongoose = require('mongoose')
 const User = require('../models/User')
+const api = require('./helper')
 const {
-  api,
   getUserResponse,
   initialUsers
-} = require('./blog_api_helper')
+} = require('./user_helper')
 
 beforeEach(async () => {
   await User.deleteMany({})
@@ -19,7 +19,7 @@ beforeEach(async () => {
 
 describe('Test initial users', () => {
   test('there are two users in the database', async () => {
-    const { body: users } = await getUserResponse()
+    const { response: users } = await getUserResponse()
 
     expect(users).toHaveLength(initialUsers.length)
   })
@@ -48,9 +48,7 @@ describe('POST /api/users', () => {
       .expect(201)
       .expect('Content-Type', /json/)
 
-    const { body: usersAtEnd } = await getUserResponse()
-    const { passwordsHash } = await getUserResponse()
-    const { names } = await getUserResponse()
+    const { response: usersAtEnd, passwordsHash, names } = await getUserResponse()
 
     expect(usersAtEnd).toHaveLength(initialUsers.length + 1)
     expect(names).toContain('bebe')
