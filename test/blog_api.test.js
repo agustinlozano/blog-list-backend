@@ -1,6 +1,7 @@
 const server = require('../index')
 const mongoose = require('mongoose')
 const Blog = require('../models/Blogs')
+const { getUserResponse } = require('./user_helper')
 const _ = require('lodash')
 const api = require('./helper')
 const {
@@ -37,11 +38,13 @@ describe('GET /api/blogs', () => {
 
 describe('POST /api/blogs', () => {
   test('a valid blog can be added', async () => {
+    const { ids } = await getUserResponse()
     const validBlog = {
       title: 'First class tests',
       author: 'Robert C. Martin',
       url: 'http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll',
-      likes: 10
+      likes: 10,
+      user: ids[0]
     }
 
     await api
@@ -57,11 +60,13 @@ describe('POST /api/blogs', () => {
   })
 
   test('if a valid blog has no likes then the blog has zero likes', async () => {
+    const { ids } = await getUserResponse()
     const blogWithoutLikes = {
       title: 'First class tests',
       author: 'Robert C. Martin',
       url: 'http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll',
-      likes: undefined
+      likes: undefined,
+      user: ids[0]
     }
 
     await api
@@ -75,16 +80,37 @@ describe('POST /api/blogs', () => {
     expect(lastBlogAdded.likes).toBe(0)
   })
 
-  test('a invalid blog cannot be added', async () => {
+  test('fails with status code 400 when a invalid blog is passed', async () => {
+    const { ids } = await getUserResponse()
     const invalidBlog = {
       author: 'Agustin Lozano',
-      likes: 10
+      likes: 10,
+      user: ids[0]
     }
 
     await api
       .post('/api/blogs')
       .send(invalidBlog)
       .expect(400)
+
+    const { response: blogsAfterPost } = await getBlogResponse()
+
+    expect(blogsAfterPost).toHaveLength(initialBlogs.length)
+  })
+
+  test('fails with status code 404 when userId is missing', async () => {
+    const invalidBlog = {
+      title: 'Some blog title',
+      author: 'PhD Cato',
+      url: 'http://blog.cato.com//2017/05/05/TestDefinitions.htmll',
+      likes: 20
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(invalidBlog)
+      .expect(404)
+      .expect({ error: 'Cannot read property \'_id\' of null' })
 
     const { response: blogsAfterPost } = await getBlogResponse()
 
