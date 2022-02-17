@@ -1,6 +1,7 @@
 const blogRouter = require('express').Router()
 const Blog = require('../models/Blogs')
 const User = require('../models/User')
+const tokenExtractor = require('../utils/tokenExtractor')
 
 blogRouter.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user', {
@@ -10,7 +11,7 @@ blogRouter.get('/', async (request, response) => {
   response.json(blogs)
 })
 
-blogRouter.post('/', async (request, response) => {
+blogRouter.post('/', tokenExtractor, async (request, response) => {
   const {
     title,
     author,
@@ -48,7 +49,7 @@ blogRouter.post('/', async (request, response) => {
   response.status(201).json(savedBlog)
 })
 
-blogRouter.get('/:id', async (request, response) => {
+blogRouter.get('/:id', tokenExtractor, async (request, response) => {
   const id = request.params.id
 
   const blog = await Blog.findById(id)
@@ -59,7 +60,7 @@ blogRouter.get('/:id', async (request, response) => {
   }
 })
 
-blogRouter.delete('/:id', async (request, response) => {
+blogRouter.delete('/:id', tokenExtractor, async (request, response) => {
   const id = request.params.id
 
   const deletedBlog = await Blog.findByIdAndDelete(id)
@@ -70,7 +71,7 @@ blogRouter.delete('/:id', async (request, response) => {
   }
 })
 
-blogRouter.put('/:id', async (request, response) => {
+blogRouter.put('/:id', tokenExtractor, async (request, response) => {
   const id = request.params.id
   const blogInfo = request.body
   const updatedInfo = {
