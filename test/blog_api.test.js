@@ -2,6 +2,7 @@ const server = require('../index')
 const mongoose = require('mongoose')
 const Blog = require('../models/Blogs')
 const { getUserResponse } = require('./user_helper')
+const getAnUserToken = require('./login_helper')
 const _ = require('lodash')
 const api = require('./helper')
 const {
@@ -38,6 +39,10 @@ describe('GET /api/blogs', () => {
 
 describe('POST /api/blogs', () => {
   test('a valid blog can be added', async () => {
+    const token = await getAnUserToken()
+
+    console.log({ token })
+
     const { ids } = await getUserResponse()
     const validBlog = {
       title: 'First class tests',
@@ -49,6 +54,7 @@ describe('POST /api/blogs', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', 'Bearer ' + token)
       .send(validBlog)
       .expect(201)
 
@@ -60,6 +66,7 @@ describe('POST /api/blogs', () => {
   })
 
   test('if a valid blog has no likes then the blog has zero likes', async () => {
+    const token = await getAnUserToken()
     const { ids } = await getUserResponse()
     const blogWithoutLikes = {
       title: 'First class tests',
@@ -71,6 +78,7 @@ describe('POST /api/blogs', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', 'Bearer ' + token)
       .send(blogWithoutLikes)
       .expect(201)
       .expect('Content-Type', /json/)
@@ -81,6 +89,7 @@ describe('POST /api/blogs', () => {
   })
 
   test('fails with status code 400 when a invalid blog is passed', async () => {
+    const token = await getAnUserToken()
     const { ids } = await getUserResponse()
     const invalidBlog = {
       author: 'Agustin Lozano',
@@ -90,6 +99,7 @@ describe('POST /api/blogs', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', 'Bearer ' + token)
       .send(invalidBlog)
       .expect(400)
 
@@ -98,7 +108,8 @@ describe('POST /api/blogs', () => {
     expect(blogsAfterPost).toHaveLength(initialBlogs.length)
   })
 
-  test('fails with status code 404 when userId is missing', async () => {
+  test('fails with status code 401 when token is missing', async () => {
+    const token = undefined
     const invalidBlog = {
       title: 'Some blog title',
       author: 'PhD Cato',
@@ -108,9 +119,10 @@ describe('POST /api/blogs', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', 'Bearer ' + token)
       .send(invalidBlog)
-      .expect(404)
-      .expect({ error: 'Cannot read property \'_id\' of null' })
+      .expect(401)
+      .expect({ error: 'jwt malformed' })
 
     const { response: blogsAfterPost } = await getBlogResponse()
 
@@ -120,11 +132,13 @@ describe('POST /api/blogs', () => {
 
 describe('DELETE /api/blogs/:id', () => {
   test('a existing blog return 204', async () => {
+    const token = await getAnUserToken()
     const { response: blogsAtStart } = await getBlogResponse()
     const deletedBlog = blogsAtStart[0]
 
     await api
       .delete(`/api/blogs/${deletedBlog.id}`)
+      .set('Authorization', 'Bearer ' + token)
       .expect(204)
 
     const { response: blogsAtEnd } = await getBlogResponse()
@@ -134,8 +148,11 @@ describe('DELETE /api/blogs/:id', () => {
   })
 
   test('fails with status code 400 with an invalid ID', async () => {
+    const token = await getAnUserToken()
+
     await api
       .delete('/api/blogs/1234')
+      .set('Authorization', 'Bearer ' + token)
       .expect(400)
       .expect({ error: 'id used is malformed' })
 
@@ -145,10 +162,12 @@ describe('DELETE /api/blogs/:id', () => {
   })
 
   test('fails with status code 404 with a nonexisting ID', async () => {
+    const token = await getAnUserToken()
     const validNonexistingId = await nonExistingId()
 
     await api
       .delete(`/api/blogs/${validNonexistingId}`)
+      .set('Authorization', 'Bearer ' + token)
       .expect(404)
 
     const { response: blogs } = await getBlogResponse()
@@ -159,26 +178,33 @@ describe('DELETE /api/blogs/:id', () => {
 
 describe('GET /api/blogs/:id', () => {
   test('a blog can be viewed', async () => {
+    const token = await getAnUserToken()
     const { response: blogs } = await getBlogResponse()
     const existingBlog = blogs[0]
 
     await api
       .get(`/api/blogs/${existingBlog.id}`)
+      .set('Authorization', 'Bearer ' + token)
       .expect(200)
       .expect('Content-Type', /json/)
   })
 
   test('fails with statuscode 404 if blog does not exist', async () => {
+    const token = await getAnUserToken()
     const validNonexistingId = await nonExistingId()
 
     await api
       .get(`/api/blogs/${validNonexistingId}`)
+      .set('Authorization', 'Bearer ' + token)
       .expect(404)
   })
 
   test('fails with statuscode 400 if id is invalid', async () => {
+    const token = await getAnUserToken()
+
     await api
       .get('/api/blogs/1234')
+      .set('Authorization', 'Bearer ' + token)
       .expect(400)
       .expect({ error: 'id used is malformed' })
   })
@@ -193,6 +219,7 @@ describe('PUT /api/blogs/:id', () => {
   }
 
   test('succeeds with a valid id', async () => {
+    const token = await getAnUserToken()
     const { response: blogsAtStart } = await getBlogResponse()
     const existingblog = blogsAtStart[0]
 
@@ -205,6 +232,7 @@ describe('PUT /api/blogs/:id', () => {
 
     await api
       .put(`/api/blogs/${existingblog.id}`)
+      .set('Authorization', 'Bearer ' + token)
       .send(blogInfo)
       .expect(200)
 
@@ -217,10 +245,12 @@ describe('PUT /api/blogs/:id', () => {
   })
 
   test('fails with statuscode 404 if id does not exist', async () => {
+    const token = await getAnUserToken()
     const validNonexistingId = await nonExistingId()
 
     await api
       .put(`/api/blogs/${validNonexistingId}`)
+      .set('Authorization', 'Bearer ' + token)
       .send(catBlogInfo)
       .expect(404)
 
@@ -231,8 +261,11 @@ describe('PUT /api/blogs/:id', () => {
   })
 
   test('fails with statuscode 400 if id is invalid', async () => {
+    const token = await getAnUserToken()
+
     await api
       .put('/api/blogs/1234')
+      .set('Authorization', 'Bearer ' + token)
       .send(catBlogInfo)
       .expect(400)
       .expect({ error: 'id used is malformed' })
