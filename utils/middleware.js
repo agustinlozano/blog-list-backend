@@ -5,6 +5,10 @@ const handleErrors = (error, req, res, next) => {
     res.status(400).send({ error: error.message })
   } else if (error.name === 'TypeError') {
     res.status(404).send({ error: error.message })
+  } else if (error.name === 'JsonWebTokenError') {
+    res.status(401).send({ error: error.message })
+  } else if (error.name === 'TokenExpiredError') {
+    res.status(401).send({ error: error.message })
   } else {
     console.error(error.message)
     console.error(error.name)
