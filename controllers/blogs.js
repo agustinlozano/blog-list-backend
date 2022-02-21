@@ -16,10 +16,10 @@ blogRouter.post('/', tokenExtractor, async (request, response) => {
     title,
     author,
     url,
-    likes = 0,
-    user: userId
+    likes = 0
   } = request.body
 
+  const { userId } = request
   /* busco el usuario responsable de crear el blog */
   const user = await User.findById(userId)
 
