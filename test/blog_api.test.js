@@ -1,7 +1,7 @@
 const server = require('../index')
 const mongoose = require('mongoose')
 const Blog = require('../models/Blogs')
-const { getUserResponse } = require('./user_helper')
+const User = require('../models/User')
 const getAnUserToken = require('./login_helper')
 const _ = require('lodash')
 const api = require('./helper')
@@ -13,6 +13,7 @@ const {
 
 beforeEach(async () => {
   await Blog.deleteMany({})
+  await User.deleteMany({})
 
   /**
    * Para cada contacto del initialBlogs
@@ -40,16 +41,11 @@ describe('GET /api/blogs', () => {
 describe('POST /api/blogs', () => {
   test('a valid blog can be added', async () => {
     const token = await getAnUserToken()
-
-    console.log({ token })
-
-    const { ids } = await getUserResponse()
     const validBlog = {
       title: 'First class tests',
       author: 'Robert C. Martin',
       url: 'http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll',
-      likes: 10,
-      user: ids[0]
+      likes: 10
     }
 
     await api
@@ -67,13 +63,11 @@ describe('POST /api/blogs', () => {
 
   test('if a valid blog has no likes then the blog has zero likes', async () => {
     const token = await getAnUserToken()
-    const { ids } = await getUserResponse()
     const blogWithoutLikes = {
       title: 'First class tests',
       author: 'Robert C. Martin',
       url: 'http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll',
-      likes: undefined,
-      user: ids[0]
+      likes: undefined
     }
 
     await api
@@ -90,11 +84,9 @@ describe('POST /api/blogs', () => {
 
   test('fails with status code 400 when a invalid blog is passed', async () => {
     const token = await getAnUserToken()
-    const { ids } = await getUserResponse()
     const invalidBlog = {
       author: 'Agustin Lozano',
-      likes: 10,
-      user: ids[0]
+      likes: 10
     }
 
     await api
