@@ -68,6 +68,38 @@ describe('POST /api/users', () => {
     expect(names).toContain('bebe')
     expect(passwordsHash).not.toContain('CatoIsAnIdiot')
   })
+
+  test('fails with status code 400 when we do not respect username minlength', async () => {
+    const invalidUsername = {
+      username: 'B',
+      name: 'bebe',
+      password: 'CatoIsAnIdiot'
+    }
+
+    await api
+      .post('/api/users')
+      .send(invalidUsername)
+      .expect(400)
+      .expect({
+        error: 'User validation failed: username: Path `username` (`B`) is shorter than the minimum allowed length (2).'
+      })
+  })
+
+  test('fails with status code 400 when we do not respect name minlength', async () => {
+    const invalidUsername = {
+      username: 'TotiX',
+      name: 'T',
+      password: 'CatoIsAnIdiot'
+    }
+
+    await api
+      .post('/api/users')
+      .send(invalidUsername)
+      .expect(400)
+      .expect({
+        error: 'User validation failed: name: Path `name` (`T`) is shorter than the minimum allowed length (3).'
+      })
+  })
 })
 
 afterAll(() => {
