@@ -62,9 +62,19 @@ blogRouter.get('/:id', tokenExtractor, async (request, response) => {
 
 blogRouter.delete('/:id', tokenExtractor, async (request, response) => {
   const id = request.params.id
+  const { userId } = request
+
+  const userDB = await User.findById(userId)
+  const userBlogsUpdated = userDB.blogs.filter(blog =>
+    blog.toString() !== id
+  )
+
+  userDB.blogs = userBlogsUpdated
 
   const deletedBlog = await Blog.findByIdAndDelete(id)
+
   if (deletedBlog) {
+    await User.findByIdAndUpdate(userId, userDB, { new: true })
     response.status(204).json(deletedBlog)
   } else {
     response.status(404).end()
