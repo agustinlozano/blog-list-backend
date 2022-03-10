@@ -74,8 +74,14 @@ blogRouter.delete('/:id', tokenExtractor, async (request, response) => {
   const deletedBlog = await Blog.findByIdAndDelete(id)
 
   if (deletedBlog) {
-    await User.findByIdAndUpdate(userId, userDB, { new: true })
-    response.status(204).json(deletedBlog)
+    const updatedInfo = await User.findByIdAndUpdate(userId, userDB, { new: true })
+
+    if (updatedInfo) {
+      response.status(204).end()
+    } else {
+      response.status(404)
+        .send('Error: The blog has been deleted but the user information could not be updated')
+    }
   } else {
     response.status(404).end()
   }
